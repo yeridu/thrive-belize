@@ -141,20 +141,20 @@
   .remember li{display:flex;gap:9px;align-items:flex-start;margin:.5em 0}
   .remember li::before{content:"";flex:0 0 auto;width:9px;height:9px;border-radius:50%;background:#f59e0b;margin-top:.5em}
 
-  /* vocabulary flip cards */
-  .vgrid{display:grid;grid-template-columns:1fr;gap:11px;margin:8px 0}
+  /* vocabulary reveal cards (accessible, no 3D) */
+  .vgrid{display:grid;grid-template-columns:1fr;gap:11px;margin:8px 0;align-items:start}
   @media(min-width:560px){.vgrid{grid-template-columns:1fr 1fr}}
-  .flip{perspective:1000px;background:none;border:0;padding:0;text-align:left;cursor:pointer;font:inherit;color:inherit}
-  .flip .inner{position:relative;border-radius:16px;min-height:104px;transition:transform .5s;transform-style:preserve-3d;box-shadow:var(--shadow)}
-  .flip[aria-expanded="true"] .inner{transform:rotateY(180deg)}
-  .flip .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;padding:14px;display:flex;flex-direction:column;justify-content:center}
-  .flip .front{color:#fff}
-  .flip .front .term{font-weight:800;font-size:1.05rem}
-  .flip .front .hint{font-size:.74rem;opacity:.9;margin-top:6px;display:flex;align-items:center;gap:6px}
-  .flip .front .hint svg{width:14px;height:14px}
-  .flip .back{background:var(--surface);border:1px solid var(--line);transform:rotateY(180deg);overflow:auto}
-  .flip .back .term{font-weight:800;font-size:.84rem;color:var(--brand);margin-bottom:3px}
-  .flip .back .def{font-size:.92rem}
+  .vcard{display:block;width:100%;text-align:left;border:0;padding:0;background:none;font:inherit;color:inherit;cursor:pointer;border-radius:16px;box-shadow:var(--shadow)}
+  .vcard .top{border-radius:16px;padding:14px;color:#fff;display:flex;flex-direction:column;gap:6px}
+  .vcard[aria-expanded="true"] .top{border-radius:16px 16px 0 0}
+  .vcard .term{font-weight:800;font-size:1.05rem}
+  .vcard .hint{font-size:.74rem;opacity:.92;display:flex;align-items:center;gap:6px}
+  .vcard .hint svg{width:14px;height:14px;flex:0 0 auto}
+  .vcard .lbl-hide{display:none}
+  .vcard[aria-expanded="true"] .lbl-show{display:none}
+  .vcard[aria-expanded="true"] .lbl-hide{display:inline}
+  .vcard .def{display:none;background:var(--surface);border:1px solid var(--line);border-top:0;border-radius:0 0 16px 16px;padding:13px 14px;font-size:.93rem;line-height:1.5}
+  .vcard[aria-expanded="true"] .def{display:block}
 
   /* reflection + practice */
   .reflect{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--m3);border-radius:14px;padding:12px 15px;margin:9px 0;box-shadow:var(--shadow)}
@@ -463,9 +463,10 @@ function viewSession(id){
       '<div style="flex:1"><h3>'+esc(c.heading)+'</h3>'+chunk(c.body)+'</div></div></div>';
   }).join('');
   var vocab=(s.vocabulary||[]).map(function(v,idx){
-    return '<button class="flip" aria-expanded="false" data-flip><span class="inner">'+
-      '<span class="face front" style="background:linear-gradient(135deg,'+m.c1+','+m.c2+')"><span class="term">'+esc(v.term)+'</span><span class="hint">'+svg('flip')+'Tap to flip</span></span>'+
-      '<span class="face back"><span class="term">'+esc(v.term)+'</span><span class="def">'+esc(v.definition)+'</span></span></span></button>';
+    return '<button class="vcard" aria-expanded="false" data-flip>'+
+      '<span class="top" style="background:linear-gradient(135deg,'+m.c1+','+m.c2+')"><span class="term">'+esc(v.term)+'</span>'+
+      '<span class="hint">'+svg('flip')+'<span class="lbl-show">Tap to show meaning</span><span class="lbl-hide">Tap to hide</span></span></span>'+
+      '<span class="def">'+esc(v.definition)+'</span></button>';
   }).join('');
   var refl=(s.reflection||[]).map(function(q){return '<div class="reflect"><div class="q">'+svg('q')+'<span>'+esc(q)+'</span></div></div>';}).join('');
   var prac=(s.practiceAtHome||[]);
@@ -478,7 +479,7 @@ function viewSession(id){
   if(concepts){html+='<h2><span class="ic" style="background:'+m.c2+'">'+svg('bulb')+'</span>Key ideas</h2>'+dia+concepts;}
   else if(dia){html+=dia;}
   if((s.remember||[]).length){html+='<div class="remember"><div class="rh">'+svg('star')+'Key things to remember</div>'+listUL(s.remember)+'</div>';}
-  if(vocab){html+='<h2><span class="ic" style="background:'+m.c2+'">'+svg('book')+'</span>Key words <span class="muted" style="font-weight:500;font-size:.8rem">(tap to flip)</span></h2><div class="vgrid">'+vocab+'</div>';}
+  if(vocab){html+='<h2><span class="ic" style="background:'+m.c2+'">'+svg('book')+'</span>Key words <span class="muted" style="font-weight:500;font-size:.8rem">(tap to show meaning)</span></h2><div class="vgrid">'+vocab+'</div>';}
   if(refl){html+='<h2><span class="ic" style="background:'+m.c2+'">'+svg('q')+'</span>Think about it</h2>'+refl;}
   if(prac.length){html+='<div class="practice"><div class="ph">'+svg('hand')+'Try it at home</div>'+listUL(prac)+'</div>';}
   html+='<div class="review"><input type="checkbox" id="rev" '+(rv?'checked':'')+'><label for="rev">Mark this session as reviewed <span class="muted">(saved only on this device)</span></label></div>'+
